@@ -1,5 +1,23 @@
 # ankerctl-ng
 
+> ## ⚠️ This project is archived — development has moved to [`ankerctlng-mcp`](https://github.com/jr551/ankerctlng-mcp)
+>
+> **`ankerctlng-mcp`** is a [Model Context Protocol](https://modelcontextprotocol.io/) server that
+> puts an AnkerMake M5/M5C under an AI agent's control — status, slicing, plate layout, print
+> control and filament changes — and is where ongoing work happens now.
+>
+> This repository is **read-only and unmaintained**, but it still works and is still useful:
+>
+> - The existing **releases, container images and binaries remain downloadable** and functional.
+> - Its **HTTP bridge on port `4470` is still a dependency** of `ankerctlng-mcp`, which uses it for
+>   PPPP gcode upload and camera capture. If you need those two features, run this alongside
+>   `ankerctlng-mcp`.
+> - The web UI and CLI here remain far more capable than the MCP server for interactive use
+>   (in-browser slicing, AI print monitoring, Home Assistant integration, notifications).
+>
+> No further fixes, features or security updates will land here. If you are planning to depend on
+> it, budget for maintaining your own fork.
+
 A substantially extended AnkerMake M5C web UI & CLI — in-browser slicing, AI-assisted OpenSCAD design, AI print monitoring with safety stops, Home Assistant integration, and more. *Now with extra AI goodness! (adapted by jr)*
 
 > 🤖 Built with **DeepSeek V4 Pro** 🧠 + **GLM 5.2** ⚡ + a dash of **Claude Opus** 🎩 — and a *lot* of **jr551** direction 🧭
