@@ -1,33 +1,8 @@
 # ankerctl-ng
 
-> ## ⚠️ This project is archived — development has moved to [`ankerctlng-mcp`](https://github.com/jr551/ankerctlng-mcp)
->
-> **`ankerctlng-mcp`** is a [Model Context Protocol](https://modelcontextprotocol.io/) server that
-> puts an AnkerMake M5/M5C under an AI agent's control — status, slicing, plate layout, print
-> control and filament changes — and is where ongoing work happens now.
->
-> This repository is **read-only and unmaintained**, but it still works and is still useful:
->
-> - The existing **releases, container images and binaries remain downloadable** and functional.
-> - Its **HTTP bridge on port `4470` is still a dependency** of `ankerctlng-mcp`, which uses it for
->   PPPP gcode upload and camera capture. If you need those two features, run this alongside
->   `ankerctlng-mcp`.
-> - The web UI and CLI here remain far more capable than the MCP server for interactive use
->   (in-browser slicing, AI print monitoring, Home Assistant integration, notifications).
->
-> No further fixes, features or security updates will land here. If you are planning to depend on
-> it, budget for maintaining your own fork.
-
-A substantially extended AnkerMake M5C web UI & CLI — in-browser slicing, AI-assisted OpenSCAD design, AI print monitoring with safety stops, Home Assistant integration, and more. *Now with extra AI goodness! (adapted by jr)*
-
-> 🤖 Built with **DeepSeek V4 Pro** 🧠 + **GLM 5.2** ⚡ + a dash of **Claude Opus** 🎩 — and a *lot* of **jr551** direction 🧭
-
-> **This is a fork.** `ankerctl-ng` builds on
-> [`Django1982/ankerctl_go_remake`](https://github.com/Django1982/ankerctl_go_remake)
-> (a Go re-implementation), which is itself a port of the original Python
-> [`Ankermgmt/ankerctl`](https://github.com/Ankermgmt/ankerctl) project and its
-> `libflagship` protocol library. All upstream work remains under the
-> [GNU GPLv3](LICENSE). See [Credits & attribution](#credits--attribution).
+Web UI and CLI for AnkerMake M5 and M5C printers on the local network. It talks
+to the printer over Anker's PPPP and MQTT protocols and accepts uploads from
+OrcaSlicer as an OctoPrint-compatible host.
 
 [![Release](https://img.shields.io/github/v/release/FabianRingel/ankerctl-ng?include_prereleases)](https://github.com/FabianRingel/ankerctl-ng/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](https://go.dev/)
@@ -37,63 +12,51 @@ A substantially extended AnkerMake M5C web UI & CLI — in-browser slicing, AI-a
 
 ![ankerctl-ng dashboard](docs/img/screenshot-home-ng.png)
 
-## ✨ What this fork adds
+## Status
 
-- 🧠 **AI print-failure monitoring** — periodic vision-model checks with saved replies and short-lived evidence images
-- 🐾 **AI safety stop** — cuts printer power via the smart socket the instant a real, live non-human animal (a curious pet!) is spotted in frame
-- 🧩 **Slice & Build** — in-browser slicing ([polyslice](https://github.com/jgphilpott/polyslice)) of STL **and** OpenSCAD, with AI-assisted OpenSCAD editing, a live 3D preview, and a post-slice AI sanity check — all off the main thread so the UI never freezes
-- 🛑 **One-tap E-STOP** on the dashboard that cuts printer power immediately
-- 🎨 **Filament colour match** — detect the loaded filament colour from the camera and match it to your library
-- 📡 **PPPP upload hardening / self-healing** — keepalives, health checks, channel-close abort, and power-cycle recovery
-- 🔌 **Smart-socket power-cycle recovery** for stuck uploads
-- 🏠 **Home Assistant** camera support and smart-socket controls
-- 🔔 **Notifications** via SMTP, raw webhook, and Apprise; notification history; HA speech hooks
-- 🎞️ **Timelapse / camera capture**
-- ⚡ **Power-saving controls**, better camera loading, and a modernized dashboard
-- 🖨️ **OrcaSlicer-first** setup flow
+This repository continues [`jr551/ankerctl-ng`](https://github.com/jr551/ankerctl-ng),
+which was archived in October 2026. Its author moved on to
+[`ankerctlng-mcp`](https://github.com/jr551/ankerctlng-mcp), an MCP server that
+still uses this project's HTTP bridge on port 4470 for G-code upload and camera
+capture.
 
-## 🤖 AI in action — design a part from a sentence
+Work here so far is security hardening: the server refuses to listen on the
+network without an API key, rejects cross-origin browser requests, no longer
+returns stored credentials, and builds with a supported Go toolchain. See
+[Security](#security).
 
-Describe a part in plain English and the model writes the OpenSCAD, renders a live 3D preview, then **reviews its own result and refines it** for up to 5 passes — with live, per-pass status so it never looks stuck:
+The project is experimental. The upstream author developed it against an M5C.
 
-![AI iterating on an OpenSCAD model](docs/img/screenshot-ai-iterating.png)
+## Features
 
-## 📸 Highlights
+- **Dashboard and control:** printer state, temperatures, Z offset, bed leveling,
+  raw G-code, and an emergency stop that cuts power through a smart socket.
+- **Uploads:** OctoPrint-compatible endpoint for OrcaSlicer. Uploads over PPPP
+  use keepalives and health checks, and can power-cycle the printer through the
+  smart socket when a transfer gets stuck.
+- **Slicing in the browser:** STL and OpenSCAD via
+  [polyslice](https://github.com/jgphilpott/polyslice), with an optional
+  AI-assisted OpenSCAD editor.
+- **Camera:** printer camera (M5), external RTSP/HTTP cameras, or a Home
+  Assistant camera entity. The M5C has no built-in camera.
+- **AI print monitoring (optional):** periodic camera checks with a vision
+  model, evidence images in the print history, and an optional power cut when
+  a failure or an animal is detected.
+- **Filament library**, including colour detection from the camera.
+- **Home Assistant:** MQTT discovery, camera entities, smart-socket control.
+- **Notifications:** Apprise, SMTP, webhooks, Home Assistant TTS announcements.
+- **Timelapse** recording and power-saving controls.
 
 | | |
 |---|---|
-| **🧾 Print history with AI evidence frames**<br>![History with AI evidence](docs/img/screenshot-history-ai.png) | **🧩 Slice & Build — STL or OpenSCAD in the browser**<br>![Slice & Build](docs/img/screenshot-slice-build.png) |
-| **✏️ AI-refined OpenSCAD result**<br>![OpenSCAD AI result](docs/img/screenshot-ai-openscad-demo.png) | **🧠 AI print monitoring + 🐾 animal safety stop**<br>![AI monitor](docs/img/screenshot-ai-monitor.png) |
+| Print history with AI evidence frames<br>![History with AI evidence](docs/img/screenshot-history-ai.png) | Slicing STL or OpenSCAD in the browser<br>![Slice & Build](docs/img/screenshot-slice-build.png) |
+| AI-assisted OpenSCAD editing<br>![OpenSCAD AI result](docs/img/screenshot-ai-openscad-demo.png) | AI print monitoring<br>![AI monitor](docs/img/screenshot-ai-monitor.png) |
 
-> *Screenshots from a live AnkerMake M5C running ankerctl-ng.*
+The AI features call an OpenAI-compatible chat-completions API (default: the
+Kilo gateway at `api.kilo.ai`) and send camera frames, G-code previews or
+OpenSCAD source to it. They are off until you configure an API key.
 
-## Status
-
-This is an **experimental build**. It is aimed at people who want the extra features above and are comfortable with a moving target.
-
-## Quick start
-
-### Source install
-
-```sh
-git clone https://github.com/FabianRingel/ankerctl-ng.git
-cd ankerctl-ng
-./install.sh install
-```
-
-The script:
-
-- installs Go build tools if missing
-- builds `ankerctl-ng`
-- installs it
-- asks whether to create a `systemd` service
-
-To update later:
-
-```sh
-git pull
-./install.sh update
-```
+## Installation
 
 ### Docker
 
@@ -107,109 +70,104 @@ docker run -d \
   ghcr.io/fabianringel/ankerctl-ng:latest
 ```
 
-> **API key required:** the container listens on all interfaces, so it refuses
-> to start without `ANKERCTL_API_KEY`. Without a key every endpoint would be
-> open to anyone who can reach the port (send G-code, switch the smart socket,
-> change settings). Generate a key with `ankerctl-ng config api-key create` or
-> any password generator. Open the UI once with `http://YOUR-HOST:4470/?apikey=<key>`
-> to get a session cookie. Only if another layer already restricts access can
-> you opt out with `ANKERCTL_ALLOW_INSECURE=true`.
+The container listens on all interfaces and will not start without
+`ANKERCTL_API_KEY`. Host networking is required: PPPP uses UDP broadcasts and
+asymmetric ports that NAT breaks.
 
-Or:
-
-**Docker Compose:**
-
-```yaml
-services:
-  ankerctl-ng:
-    image: ghcr.io/fabianringel/ankerctl-ng:latest
-    container_name: ankerctl-ng
-    network_mode: host
-    restart: unless-stopped
-    volumes:
-      - ~/.ankerctl-ng:/home/ankerctl/.ankerctl-ng
-      - ankerctl-ng-captures:/captures
-    env_file: .env
-
-volumes:
-  ankerctl-ng-captures:
-```
-
-Copy `.env.example` to `.env` and adjust the values, then run:
+With Docker Compose, copy `.env.example` to `.env`, set `ANKERCTL_API_KEY`, and
+use the [`docker-compose.yml`](docker-compose.yml) in this repository:
 
 ```sh
 docker compose up -d
 ```
 
-`network_mode: host` is still required for printer LAN traffic.
-
-> **Firewall:** If ufw or another stateful firewall is enabled on the host, allow inbound UDP on **32100, 32108, and 32109**. ankerctl binds these as fixed local ports so conntrack can pass the printer's reply to a broadcast LanSearch. See [`docs/operations/firewall.md`](docs/operations/firewall.md) for the full rationale and `ufw allow` commands.
-
-To build locally instead:
+To build the image yourself:
 
 ```sh
 docker build -t ankerctl-ng .
 ```
 
-## OrcaSlicer
+### From source (Linux)
 
-Use OrcaSlicer with:
+```sh
+git clone https://github.com/FabianRingel/ankerctl-ng.git
+cd ankerctl-ng
+./install.sh install
+```
 
-- Host type: `OctoPrint`
-- Host / URL: `http://YOUR-HOST:4470`
-- API key: your `ANKERCTL_API_KEY` (required whenever the server is reachable from other hosts)
+`install.sh` installs Go if needed, builds and installs the binary, and
+optionally sets up a systemd service listening on `0.0.0.0:4470`. If no API key
+exists for the service user, it creates one and prints it once. Update with
+`git pull && ./install.sh update`.
 
-Use `Send and Print` when you want the job to start immediately.
-
-## Notes
-
-- Default UI port: `4470`
-- Config dir for new installs: `~/.ankerctl-ng`
-- Older `~/.ankerctl` installs are still detected automatically
-
-## Repo docs
-
-Most of the older migration and protocol docs are still in [`docs/`](docs/), but the simplest path is:
-
-1. use `install.sh`
-2. open the web UI
-3. import/login
-4. connect OrcaSlicer
-
-## Building manually
-
-If you prefer to build the binary yourself instead of `install.sh`:
+To build by hand (Go 1.27 or newer):
 
 ```sh
 bash scripts/prepare-web-vendor.sh   # fetch vendored web assets
 go build -o ankerctl-ng ./cmd/ankerctl/
-go test ./...                        # optional: run the test suite
+go test ./...
 ```
 
-## Credits & attribution
+## First steps
 
-`ankerctl-ng` is a community fork and would not exist without the work it descends from:
+1. Open `http://YOUR-HOST:4470/?apikey=<key>` once. This sets a session cookie
+   and removes the key from the URL.
+2. Log in with your Anker account or import the login from the AnkerMake /
+   eufyMake slicer. This fetches the printer's keys from the Anker cloud. File
+   uploads and video then go directly to the printer over PPPP on the LAN;
+   status and commands still use Anker's cloud MQTT broker.
+3. Point OrcaSlicer at the server (see below).
 
-- **Original project:** [`Ankermgmt/ankerctl`](https://github.com/Ankermgmt/ankerctl)
-  (the Python `ankerctl` / `ankermake-m5-protocol` project) — the `libflagship`
-  library that reverse-engineered the AnkerMake M5 MQTT, PPPP, and HTTP/Cloud
-  APIs, and the first web UI/CLI that everything here is built on.
-- **Go re-implementation (direct upstream):**
-  [`Django1982/ankerctl_go_remake`](https://github.com/Django1982/ankerctl_go_remake) —
-  a 1:1 Go port of the Python original (see [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md)).
-  This fork is based on it, and keeps the Go module path
-  `github.com/django1982/ankerctl` to preserve import compatibility.
-- **This fork (`ankerctl-ng`, by jr):** adds AI print-failure monitoring, PPPP
-  upload hardening / self-healing, smart-socket power-cycle recovery, Home
-  Assistant integration, expanded notifications, and UI changes.
+## OrcaSlicer
 
-Many thanks to the upstream authors and the AnkerMake protocol community.
-See [`NOTICE`](NOTICE) for the full attribution chain and
-[`CONTRIBUTING.md`](CONTRIBUTING.md) to get involved.
+- Host type: `OctoPrint`
+- Host / URL: `http://YOUR-HOST:4470`
+- API key: your `ANKERCTL_API_KEY`
+
+Use "Send and Print" to start the job immediately.
+
+## Security
+
+- **API key:** required whenever the server listens on anything other than
+  loopback. Generate one with `ankerctl-ng config api-key create` or any password
+  generator, and pass it via `ANKERCTL_API_KEY`. Only if another layer already
+  restricts access (firewall, authenticating reverse proxy) should you set
+  `ANKERCTL_ALLOW_INSECURE=true`.
+- **Cross-origin requests:** state-changing browser requests and WebSocket
+  connections are only accepted from the UI's own origin. Add other origins
+  with `ANKERCTL_TRUSTED_ORIGINS`. Behind a reverse proxy, set
+  `ANKERCTL_TRUST_PROXY=true`.
+- **Stored credentials** (Home Assistant tokens, MQTT password, AI and Apprise
+  keys) are write-only: the API reports whether one is saved, never its value.
+- **Network:** TCP 4470 for the UI; UDP 32100, 32108 and 32109 for PPPP. With a
+  stateful firewall, allow those UDP ports inbound, see
+  [`docs/operations/firewall.md`](docs/operations/firewall.md).
+- Report vulnerabilities as described in [`SECURITY.md`](SECURITY.md).
+
+## Configuration
+
+All settings can be passed as environment variables; [`.env.example`](.env.example)
+lists them with explanations. The config directory is `~/.ankerctl-ng`; an
+existing `~/.ankerctl` is picked up automatically. Older migration and protocol
+notes are in [`docs/`](docs/).
+
+## Credits
+
+This project builds on:
+
+1. [`Ankermgmt/ankerctl`](https://github.com/Ankermgmt/ankerctl): the original
+   Python tool and the `libflagship` library that reverse-engineered the
+   AnkerMake MQTT, PPPP and HTTP/cloud protocols.
+2. [`Django1982/ankerctl_go_remake`](https://github.com/Django1982/ankerctl_go_remake):
+   the Go port of the Python original (see [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md)).
+   The Go module path `github.com/django1982/ankerctl` is kept from there.
+3. [`jr551/ankerctl-ng`](https://github.com/jr551/ankerctl-ng): the
+   `ankerctl-ng` fork that added AI print monitoring, PPPP upload recovery,
+   smart-socket and Home Assistant integration, notifications and the current UI.
+
+[`NOTICE`](NOTICE) records the full attribution chain.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to contribute.
 
 ## License
 
-This project and all of its upstreams are licensed under the
-**[GNU General Public License v3.0](LICENSE)**. As a derivative work, this fork
-stays under the same license, with source available and the upstream
-copyright/license text in [`LICENSE`](LICENSE) preserved unchanged.
+GNU General Public License v3.0, like all upstream projects. See [`LICENSE`](LICENSE).
