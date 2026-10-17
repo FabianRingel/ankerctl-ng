@@ -16,7 +16,12 @@ func (h *Handler) SettingsPrintMonitorGet(w http.ResponseWriter, _ *http.Request
 	if cfg != nil {
 		pm = cfg.PrintMonitor
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"print_monitor": pm})
+	redacted, ok := h.redactedSection(pm, printMonitorSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load print monitor settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"print_monitor": redacted})
 }
 
 func (h *Handler) SettingsPrintMonitorUpdate(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +60,12 @@ func (h *Handler) SettingsPrintMonitorUpdate(w http.ResponseWriter, r *http.Requ
 	if pm, ok := h.printMonitor(); ok {
 		pm.Configure(updated)
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "print_monitor": updated})
+	redacted, ok := h.redactedSection(updated, printMonitorSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load print monitor settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "print_monitor": redacted})
 }
 
 func (h *Handler) PrintMonitorStatus(w http.ResponseWriter, _ *http.Request) {
@@ -98,7 +108,12 @@ func (h *Handler) SettingsSmartSocketGet(w http.ResponseWriter, _ *http.Request)
 	if cfg != nil {
 		ss = cfg.SmartSocket
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"smart_socket": ss})
+	redacted, ok := h.redactedSection(ss, smartSocketSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load smart socket settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"smart_socket": redacted})
 }
 
 func (h *Handler) SettingsSmartSocketUpdate(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +149,12 @@ func (h *Handler) SettingsSmartSocketUpdate(w http.ResponseWriter, r *http.Reque
 		h.writeError(w, http.StatusInternalServerError, "failed to update smart socket settings")
 		return
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "smart_socket": updated})
+	redacted, ok := h.redactedSection(updated, smartSocketSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load smart socket settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "smart_socket": redacted})
 }
 
 func smartSocketConfigured(ss model.SmartSocketConfig) bool {

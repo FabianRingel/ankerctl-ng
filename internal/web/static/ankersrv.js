@@ -1926,7 +1926,7 @@ $(function () {
             const events = settings.events || {};
             const progress = settings.progress || {};
             appriseFields.enabled.prop("checked", Boolean(settings.enabled));
-            markSavedSecret(appriseFields.key, Boolean(settings.key), "key");
+            markSavedSecret(appriseFields.key, Boolean(settings.key_configured || settings.key), "key");
             appriseFields.tag.val(settings.tag || "");
             // Parse the canonical server_url back into the friendly per-method
             // fields and select the matching delivery mode.
@@ -1951,7 +1951,7 @@ $(function () {
             const ann = announcement || {};
             appriseFields.announcement.enabled.prop("checked", Boolean(ann.enabled));
             appriseFields.announcement.baseUrl.val(ann.base_url || "");
-            markSavedSecret(appriseFields.announcement.token, Boolean(ann.token), "token");
+            markSavedSecret(appriseFields.announcement.token, Boolean(ann.token_configured || ann.token), "token");
             appriseFields.announcement.ttsEntity.val(ann.tts_entity_id || "");
             appriseFields.announcement.mediaPlayer.val(ann.media_player_entity_id || "");
             appriseFields.announcement.language.val(ann.language || "");
@@ -3933,7 +3933,7 @@ $(function () {
             pmFields.confidenceThreshold.val(settings.confidence_threshold || 0.7);
             pmFields.url.val(settings.openrouter_url || pmDefaults.url);
             pmFields.model.val(settings.model || pmDefaults.model);
-            markSavedSecret(pmFields.key, Boolean(settings.openrouter_key), "API key");
+            markSavedSecret(pmFields.key, Boolean(settings.openrouter_key_configured || settings.openrouter_key), "API key");
             pmFields.prompt.val(settings.prompt || "");
             renderConfidenceLabel();
         };
@@ -4150,7 +4150,7 @@ $(function () {
                     const cfg = data.smart_socket || {};
                     ssFields.enabled.prop("checked", Boolean(cfg.enabled));
                     ssFields.baseURL.val(cfg.base_url || "");
-                    markSavedSecret(ssFields.token, Boolean(cfg.token), "token");
+                    markSavedSecret(ssFields.token, Boolean(cfg.token_configured || cfg.token), "token");
                     ssFields.switchEntity.val(cfg.switch_entity || "");
                     ssFields.powerEntity.val(cfg.power_entity || "");
                     ssFields.autoOff.prop("checked", Boolean(cfg.auto_off_on_fail));
@@ -4316,7 +4316,7 @@ $(function () {
                     mqttFields.host.val(cfg.mqtt_host || "");
                     mqttFields.port.val(cfg.mqtt_port || 1883);
                     mqttFields.user.val(cfg.mqtt_username || "");
-                    markSavedSecret(mqttFields.password, Boolean(cfg.mqtt_password), "password");
+                    markSavedSecret(mqttFields.password, Boolean(cfg.mqtt_password_configured || cfg.mqtt_password), "password");
                     mqttFields.prefix.val(cfg.discovery_prefix || "homeassistant");
                 }
             } catch (err) {
