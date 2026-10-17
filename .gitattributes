@@ -1,0 +1,21 @@
+# Normalize line endings: LF in the repo and in every checkout, regardless of
+# core.autocrlf. CRLF in shell scripts breaks the Docker build
+# ("set: pipefail: invalid option name") and the container entrypoint.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.mp4 binary
+*.db binary
