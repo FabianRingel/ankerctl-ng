@@ -101,10 +101,19 @@ git pull
 docker run -d \
   --name ankerctl-ng \
   --network host \
+  -e ANKERCTL_API_KEY=<random, at least 16 chars of [A-Za-z0-9_-]> \
   -v ~/.ankerctl-ng:/home/ankerctl/.ankerctl-ng \
   -v ankerctl-ng-captures:/captures \
   ghcr.io/jr551/ankerctl-ng:latest
 ```
+
+> **API key required:** the container listens on all interfaces, so it refuses
+> to start without `ANKERCTL_API_KEY`. Without a key every endpoint would be
+> open to anyone who can reach the port (send G-code, switch the smart socket,
+> change settings). Generate a key with `ankerctl-ng config api-key create` or
+> any password generator. Open the UI once with `http://YOUR-HOST:4470/?apikey=<key>`
+> to get a session cookie. Only if another layer already restricts access can
+> you opt out with `ANKERCTL_ALLOW_INSECURE=true`.
 
 Or:
 
@@ -148,7 +157,7 @@ Use OrcaSlicer with:
 
 - Host type: `OctoPrint`
 - Host / URL: `http://YOUR-HOST:4470`
-- API key: only if you enabled write protection
+- API key: your `ANKERCTL_API_KEY` (required whenever the server is reachable from other hosts)
 
 Use `Send and Print` when you want the job to start immediately.
 

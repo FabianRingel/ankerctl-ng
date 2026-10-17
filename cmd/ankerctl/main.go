@@ -122,6 +122,16 @@ func runWebserver() error {
 		return fmt.Errorf("config manager: %w", err)
 	}
 
+	// Refuse to expose an unauthenticated API before any service starts
+	// talking to the printer. The web server repeats this check on start.
+	apiKey, err := cfgMgr.ResolveAPIKey()
+	if err != nil {
+		return fmt.Errorf("resolve API key: %w", err)
+	}
+	if err := web.ValidateExposure(resolvedListenHost(serverListen), apiKey, web.InsecureExposureAllowed()); err != nil {
+		return err
+	}
+
 	// 2. Database
 	dbPath := filepath.Join(configDir, "ankerctl.db")
 	database, err := db.Open(dbPath)

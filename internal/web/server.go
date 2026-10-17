@@ -71,11 +71,13 @@ type Server struct {
 	port               int
 	maxUploadBytes     int64
 	devMode            bool
+	allowInsecure      bool
 
-	hostSet    bool
-	portSet    bool
-	apiKeySet  bool
-	devModeSet bool
+	hostSet          bool
+	portSet          bool
+	apiKeySet        bool
+	devModeSet       bool
+	allowInsecureSet bool
 
 	appVersion string
 
@@ -137,13 +139,25 @@ func WithAPIKey(key string) Option {
 	}
 }
 
-// WithInsecure disables API-key checks by clearing the configured key.
+// WithInsecure disables API-key checks by clearing the configured key. This is
+// an explicit opt-out, so it also lifts the exposure guard.
 func WithInsecure(insecure bool) Option {
 	return func(s *Server) {
 		if insecure {
 			s.apiKey = ""
 			s.apiKeySet = true
+			s.allowInsecure = true
+			s.allowInsecureSet = true
 		}
+	}
+}
+
+// WithAllowInsecure overrides ANKERCTL_ALLOW_INSECURE: when true the server may
+// listen on non-loopback addresses without an API key.
+func WithAllowInsecure(allow bool) Option {
+	return func(s *Server) {
+		s.allowInsecure = allow
+		s.allowInsecureSet = true
 	}
 }
 
@@ -406,6 +420,13 @@ func (s *Server) initialize() error {
 			}
 			s.apiKey = apiKey
 		}
+	}
+
+	if !s.allowInsecureSet {
+		s.allowInsecure = InsecureExposureAllowed()
+	}
+	if err := ValidateExposure(s.host, s.apiKey, s.allowInsecure); err != nil {
+		return err
 	}
 
 	secret, err := s.loadOrCreateSecretKey()
