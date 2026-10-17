@@ -255,15 +255,16 @@ $(function () {
     }
 
     /**
-     * Escape a string for safe insertion into HTML to prevent XSS.
+     * Escape a string for safe insertion into HTML text *and* quoted attribute
+     * values to prevent XSS. Quotes must be escaped too: results are used in
+     * attributes such as data-filename="${...}", and serializing a DOM text node
+     * (the previous implementation) leaves " and ' untouched.
+     * Keep in sync with escapeHtml in ankersrv-slice.js.
      * @param {string} str
      * @returns {string} HTML-escaped string
      */
     function escapeHtml(str) {
-        const node = document.createTextNode(String(str));
-        const div = document.createElement("div");
-        div.appendChild(node);
-        return div.innerHTML;
+        return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" }[c]));
     }
 
     function safeHttpURL(raw) {
