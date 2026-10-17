@@ -30,7 +30,7 @@ A substantially extended AnkerMake M5C web UI & CLI — in-browser slicing, AI-a
 > [GNU GPLv3](LICENSE). See [Credits & attribution](#credits--attribution).
 
 [![Release](https://img.shields.io/badge/release-v1.1.1-success)](https://github.com/jr551/ankerctl-ng/releases/tag/v1.1.1)
-[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](https://go.dev/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![CI](https://github.com/jr551/ankerctl-ng/actions/workflows/ci.yml/badge.svg)](https://github.com/jr551/ankerctl-ng/actions/workflows/ci.yml)
 [![Docker](https://img.shields.io/badge/ghcr.io-ankerctl--ng-blue?logo=docker)](https://ghcr.io/jr551/ankerctl-ng)
