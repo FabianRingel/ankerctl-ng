@@ -81,7 +81,7 @@ $(function () {
                 // links to its release tag (falls back to the releases page).
                 const current = data.current;
                 if (current && current !== "dev") {
-                    const releaseURL = "https://github.com/jr551/ankerctl-ng/releases/tag/" + encodeURIComponent(current);
+                    const releaseURL = "https://github.com/FabianRingel/ankerctl-ng/releases/tag/" + encodeURIComponent(current);
                     $("#update-badge-version").text(current);
                     $("#update-badge")
                         .attr("href", releaseURL)
@@ -4675,7 +4675,7 @@ $(function () {
         if (testBadgeBtn) {
             testBadgeBtn.addEventListener("click", function () {
                 $("#update-badge-version").text("v99.0.0");
-                $("#update-badge").attr("href", "https://github.com/jr551/ankerctl-ng/releases").show();
+                $("#update-badge").attr("href", "https://github.com/FabianRingel/ankerctl-ng/releases").show();
             });
         }
         if (hideBadgeBtn) {

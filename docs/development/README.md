@@ -11,7 +11,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/jr551/ankerctl-ng.git
+git clone https://github.com/FabianRingel/ankerctl-ng.git
 cd ankerctl-ng
 
 # Build

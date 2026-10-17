@@ -21,8 +21,8 @@ Attribution chain
    The Go module path of this codebase (github.com/django1982/ankerctl) reflects
    this lineage and is intentionally preserved.
 
-3. This fork
-   ankerctl-ng (jr)
+3. ankerctl-ng (direct upstream of this repository)
+   jr551/ankerctl-ng  -  https://github.com/jr551/ankerctl-ng
    Rebranded "ankerctl-ng" and extended with, among other things:
      - AI print-failure monitoring (saved replies, short-lived evidence images)
      - PPPP upload hardening / self-healing (keepalives, health checks,
@@ -33,6 +33,12 @@ Attribution chain
        Home Assistant speech hooks
      - Timelapse / camera capture
      - UI changes and an OrcaSlicer-first setup flow
+
+4. This repository
+   FabianRingel/ankerctl-ng  -  https://github.com/FabianRingel/ankerctl-ng
+   Continued after jr551/ankerctl-ng was archived. Adds security hardening
+   (mandatory API key on non-loopback binds, cross-origin/CSRF protection,
+   write-only secrets, escaping fixes, current Go toolchain).
 
 License obligations (GPLv3)
 ---------------------------

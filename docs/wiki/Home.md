@@ -25,7 +25,7 @@ Welcome to the ankerctl wiki. ankerctl is a Go reimplementation of [ankermake-m5
 
 ### Option 1: Download the Binary (fastest)
 
-Download the latest release from [Releases](https://github.com/jr551/ankerctl-ng/releases) (v1.0.0+), make it executable, and run:
+Download the latest release from [Releases](https://github.com/FabianRingel/ankerctl-ng/releases) (v1.0.0+), make it executable, and run:
 
 ```sh
 chmod +x ankerctl-linux-amd64
@@ -40,13 +40,13 @@ docker run -d \
   --network host \
   -v ~/.ankerctl:/root/.ankerctl \
   -e ANKERCTL_HOST=0.0.0.0 \
-  ghcr.io/jr551/ankerctl-ng:latest
+  ghcr.io/fabianringel/ankerctl-ng:latest
 ```
 
 ### Option 3: Build from Source
 
 ```sh
-git clone https://github.com/jr551/ankerctl-ng.git
+git clone https://github.com/FabianRingel/ankerctl-ng.git
 cd ankerctl-ng
 
 # Download vendor assets (Bootstrap, Chart.js etc.) — required before building!
@@ -65,7 +65,7 @@ Navigate to [http://localhost:4470](http://localhost:4470) and log in with your 
 
 ## Quick Links
 
-- [GitHub Repository](https://github.com/jr551/ankerctl-ng)
-- [Releases](https://github.com/jr551/ankerctl-ng/releases)
-- [Docker Image](https://github.com/jr551?tab=packages&package_type=container)
-- [Issue Tracker](https://github.com/jr551/ankerctl-ng/issues)
+- [GitHub Repository](https://github.com/FabianRingel/ankerctl-ng)
+- [Releases](https://github.com/FabianRingel/ankerctl-ng/releases)
+- [Docker Image](https://github.com/FabianRingel?tab=packages&package_type=container)
+- [Issue Tracker](https://github.com/FabianRingel/ankerctl-ng/issues)

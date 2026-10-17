@@ -29,11 +29,11 @@ A substantially extended AnkerMake M5C web UI & CLI — in-browser slicing, AI-a
 > `libflagship` protocol library. All upstream work remains under the
 > [GNU GPLv3](LICENSE). See [Credits & attribution](#credits--attribution).
 
-[![Release](https://img.shields.io/badge/release-v1.1.1-success)](https://github.com/jr551/ankerctl-ng/releases/tag/v1.1.1)
+[![Release](https://img.shields.io/github/v/release/FabianRingel/ankerctl-ng?include_prereleases)](https://github.com/FabianRingel/ankerctl-ng/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](https://go.dev/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![CI](https://github.com/jr551/ankerctl-ng/actions/workflows/ci.yml/badge.svg)](https://github.com/jr551/ankerctl-ng/actions/workflows/ci.yml)
-[![Docker](https://img.shields.io/badge/ghcr.io-ankerctl--ng-blue?logo=docker)](https://ghcr.io/jr551/ankerctl-ng)
+[![CI](https://github.com/FabianRingel/ankerctl-ng/actions/workflows/ci.yml/badge.svg)](https://github.com/FabianRingel/ankerctl-ng/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/badge/ghcr.io-ankerctl--ng-blue?logo=docker)](https://ghcr.io/fabianringel/ankerctl-ng)
 
 ![ankerctl-ng dashboard](docs/img/screenshot-home-ng.png)
 
@@ -76,7 +76,7 @@ This is an **experimental build**. It is aimed at people who want the extra feat
 ### Source install
 
 ```sh
-git clone https://github.com/jr551/ankerctl-ng.git
+git clone https://github.com/FabianRingel/ankerctl-ng.git
 cd ankerctl-ng
 ./install.sh install
 ```
@@ -104,7 +104,7 @@ docker run -d \
   -e ANKERCTL_API_KEY=<random, at least 16 chars of [A-Za-z0-9_-]> \
   -v ~/.ankerctl-ng:/home/ankerctl/.ankerctl-ng \
   -v ankerctl-ng-captures:/captures \
-  ghcr.io/jr551/ankerctl-ng:latest
+  ghcr.io/fabianringel/ankerctl-ng:latest
 ```
 
 > **API key required:** the container listens on all interfaces, so it refuses
@@ -122,7 +122,7 @@ Or:
 ```yaml
 services:
   ankerctl-ng:
-    image: ghcr.io/jr551/ankerctl-ng:latest
+    image: ghcr.io/fabianringel/ankerctl-ng:latest
     container_name: ankerctl-ng
     network_mode: host
     restart: unless-stopped

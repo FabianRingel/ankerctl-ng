@@ -2,7 +2,7 @@ services:
     ankerctl-ng:
         # Use 'build: .' to build locally instead of pulling from the registry.
         # build: .
-        image: ghcr.io/jr551/ankerctl-ng:latest
+        image: ghcr.io/fabianringel/ankerctl-ng:latest
         container_name: ankerctl-ng
         restart: unless-stopped
 
