@@ -72,6 +72,7 @@ type Server struct {
 	maxUploadBytes     int64
 	devMode            bool
 	allowInsecure      bool
+	trustedOrigins     []string
 
 	hostSet          bool
 	portSet          bool
@@ -227,11 +228,17 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 
+	crossOrigin, err := mw.CrossOriginProtection(s.trustedOrigins, s.logger)
+	if err != nil {
+		return fmt.Errorf("ANKERCTL_TRUSTED_ORIGINS: %w", err)
+	}
+
 	r := chi.NewRouter()
 	r.Use(chimw.Recoverer)
 	r.Use(chimw.RequestID)
 	r.Use(mw.AccessLogger(s.logger))
 	r.Use(mw.SecurityHeaders)
+	r.Use(crossOrigin)
 	r.Use(mw.RateLimit(100, time.Minute))
 	r.Use(mw.BodySizeLimit(s.maxUploadBytes))
 	r.Use(mw.RequirePrinter(s))
@@ -337,6 +344,15 @@ func (s *Server) ReloadState() {
 	}
 }
 
+// WebSocketOriginAllowed reports whether a WebSocket handshake comes from the
+// same origin or from one listed in ANKERCTL_TRUSTED_ORIGINS.
+func (s *Server) WebSocketOriginAllowed(r *http.Request) bool {
+	s.mu.RLock()
+	trusted := s.trustedOrigins
+	s.mu.RUnlock()
+	return mw.WebSocketOriginAllowed(r, trusted)
+}
+
 // SessionManager returns the session manager used by auth middleware.
 func (s *Server) SessionManager() *mw.SessionManager {
 	s.mu.RLock()
@@ -421,6 +437,8 @@ func (s *Server) initialize() error {
 			s.apiKey = apiKey
 		}
 	}
+
+	s.trustedOrigins = mw.ParseTrustedOrigins(os.Getenv("ANKERCTL_TRUSTED_ORIGINS"))
 
 	if !s.allowInsecureSet {
 		s.allowInsecure = InsecureExposureAllowed()
