@@ -2,7 +2,7 @@
 
 ## Docker (recommended)
 
-The Docker image is published to `ghcr.io/jr551/ankerctl-ng`. It includes `ffmpeg` for timelapse support and runs as a single static binary.
+The Docker image is published to `ghcr.io/fabianringel/ankerctl-ng`. It includes `ffmpeg` for timelapse support and runs as a single static binary.
 
 ### Quick Start
 
@@ -12,7 +12,7 @@ docker run -d \
   --network host \
   -v ~/.ankerctl:/root/.ankerctl \
   -e ANKERCTL_HOST=0.0.0.0 \
-  ghcr.io/jr551/ankerctl-ng:latest
+  ghcr.io/fabianringel/ankerctl-ng:latest
 ```
 
 ### Docker Compose
@@ -20,7 +20,7 @@ docker run -d \
 ```yaml
 services:
   ankerctl:
-    image: ghcr.io/jr551/ankerctl-ng:latest
+    image: ghcr.io/fabianringel/ankerctl-ng:latest
     container_name: ankerctl
     network_mode: host
     restart: unless-stopped
@@ -46,7 +46,7 @@ docker compose up -d
 
 ## Binary Download
 
-Download the latest release for your platform from [Releases](https://github.com/jr551/ankerctl-ng/releases).
+Download the latest release for your platform from [Releases](https://github.com/FabianRingel/ankerctl-ng/releases).
 
 Available binaries:
 - `ankerctl-linux-amd64`
@@ -68,7 +68,7 @@ chmod +x ankerctl-linux-amd64
 Requires Go 1.24 or later.
 
 ```sh
-git clone https://github.com/jr551/ankerctl-ng.git
+git clone https://github.com/FabianRingel/ankerctl-ng.git
 cd ankerctl-ng
 
 # Download vendor assets — required before building, otherwise blank web UI!
@@ -167,7 +167,7 @@ See [Protocol-Details#local-socket-bind-ufw--conntrack](Protocol-Details#local-s
 
 ## Environment Variables
 
-See [`.env.example`](https://github.com/jr551/ankerctl-ng/blob/main/.env.example) for a complete template with comments. All variables are optional -- ankerctl works with sensible defaults.
+See [`.env.example`](https://github.com/FabianRingel/ankerctl-ng/blob/main/.env.example) for a complete template with comments. All variables are optional -- ankerctl works with sensible defaults.
 
 ### Server
 

@@ -34,11 +34,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Image name
+        id: image
+        # Image names must be lowercase; derive from this repository so the
+        # workflow publishes to ghcr.io/<owner>/<repo> wherever it runs.
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Compute tags
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/jr551/ankerctl-ng
+          images: ${{ steps.image.outputs.name }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}

@@ -19,7 +19,25 @@ func (h *Handler) NotificationsGet(w http.ResponseWriter, _ *http.Request) {
 		apprise = cfg.Notifications.Apprise
 		announcement = cfg.Notifications.Announcement
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"apprise": apprise, "announcement": announcement})
+	h.writeNotificationSettings(w, map[string]any{}, apprise, announcement)
+}
+
+// writeNotificationSettings responds with both notification sections, secrets
+// redacted, merged into base.
+func (h *Handler) writeNotificationSettings(w http.ResponseWriter, base map[string]any, apprise model.AppriseConfig, announcement model.HomeAnnouncementConfig) {
+	redactedApprise, ok := h.redactedSection(apprise, appriseSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load notification settings")
+		return
+	}
+	redactedAnnouncement, ok := h.redactedSection(announcement, announcementSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load notification settings")
+		return
+	}
+	base["apprise"] = redactedApprise
+	base["announcement"] = redactedAnnouncement
+	h.writeJSON(w, http.StatusOK, base)
 }
 
 // NotificationsUpdate updates notification settings.
@@ -78,7 +96,7 @@ func (h *Handler) NotificationsUpdate(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusInternalServerError, "failed to update settings")
 		return
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "apprise": updated, "announcement": updatedAnnouncement})
+	h.writeNotificationSettings(w, map[string]any{"status": "ok"}, updated, updatedAnnouncement)
 }
 
 // NotificationsTest sends real test messages, optionally using payload overrides.
@@ -120,6 +138,13 @@ func (h *Handler) NotificationsTest(w http.ResponseWriter, r *http.Request) {
 
 	appriseCfg := cfg.Notifications.Apprise
 	announcementCfg := cfg.Notifications.Announcement
+	// Stored secrets are only ever sent to the stored destination. If the
+	// request points the test at a different server, the caller must supply
+	// the matching secret itself; otherwise the test endpoint could be used
+	// to make the server send the saved Apprise key or Home Assistant token
+	// to an arbitrary URL.
+	storedAppriseURL := appriseCfg.ServerURL
+	storedAnnouncementURL := announcementCfg.BaseURL
 	if apprisePayload != nil {
 		// Only allow overriding connection parameters for the test request.
 		// This is defense-in-depth against SSRF: even if URL validation in
@@ -154,6 +179,12 @@ func (h *Handler) NotificationsTest(w http.ResponseWriter, r *http.Request) {
 		if v, ok := announcementPayload["template"].(string); ok {
 			announcementCfg.Template = v
 		}
+	}
+	if !sameEndpoint(appriseCfg.ServerURL, storedAppriseURL) && !payloadHasSecret(apprisePayload, "key") {
+		appriseCfg.Key = ""
+	}
+	if !sameEndpoint(announcementCfg.BaseURL, storedAnnouncementURL) && !payloadHasSecret(announcementPayload, "token") {
+		announcementCfg.Token = ""
 	}
 
 	var snap notifications.SnapshotCapturer

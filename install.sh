@@ -77,6 +77,32 @@ install_binary() {
     run_as_root install -Dm755 "${BUILD_OUT}" "${target}"
 }
 
+as_service_user() {
+    service_user="$1"
+    shift
+    if [ "$(id -un)" = "${service_user}" ]; then
+        "$@"
+    elif need_cmd sudo; then
+        sudo -u "${service_user}" -- "$@"
+    else
+        echo "Need sudo to run as ${service_user}: $*" >&2
+        return 1
+    fi
+}
+
+# The service listens on 0.0.0.0, and ankerctl-ng refuses to start on a
+# non-loopback address without an API key. Create one if none is configured.
+ensure_api_key() {
+    service_user="$1"
+    config_dir="$2"
+    bin="/usr/local/bin/${APP_NAME}"
+    if as_service_user "${service_user}" "${bin}" --config "${config_dir}" config api-key get | grep -q "No API key configured"; then
+        echo "The service listens on 0.0.0.0:4470 and requires an API key. Creating one:"
+        as_service_user "${service_user}" "${bin}" --config "${config_dir}" config api-key create
+        echo "Use it as the OctoPrint API key in OrcaSlicer and open the UI once via http://HOST:4470/?apikey=<key>"
+    fi
+}
+
 write_service() {
     unit_path="/etc/systemd/system/${SERVICE_NAME}"
     user_name="${SUDO_USER:-$USER}"
@@ -86,6 +112,7 @@ write_service() {
         exit 1
     fi
     config_dir="${home_dir}/.ankerctl-ng"
+    ensure_api_key "${user_name}" "${config_dir}"
     cat <<EOF | run_as_root tee "${unit_path}" >/dev/null
 [Unit]
 Description=ankerctl-ng experimental web UI
@@ -139,7 +166,8 @@ main() {
             build_binary
             install_binary
             maybe_manage_service
-            echo "Done. Run '${APP_NAME} webserver --listen 0.0.0.0:4470' to start manually."
+            echo "Done. Run '${APP_NAME} webserver --listen 0.0.0.0:4470' to start manually"
+            echo "(listening on 0.0.0.0 requires an API key: '${APP_NAME} config api-key create')."
             ;;
         update)
             install_go_tools

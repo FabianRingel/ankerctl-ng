@@ -11,6 +11,6 @@
 
 **Links**
 
-- [Repository](https://github.com/jr551/ankerctl-ng)
-- [Issues](https://github.com/jr551/ankerctl-ng/issues)
-- [Releases](https://github.com/jr551/ankerctl-ng/releases)
+- [Repository](https://github.com/FabianRingel/ankerctl-ng)
+- [Issues](https://github.com/FabianRingel/ankerctl-ng/issues)
+- [Releases](https://github.com/FabianRingel/ankerctl-ng/releases)

@@ -29,6 +29,12 @@ type videoState interface {
 	VideoSupported() bool
 }
 
+// originState decides whether a WebSocket handshake's Origin is acceptable
+// (same origin or an explicitly trusted one).
+type originState interface {
+	WebSocketOriginAllowed(r *http.Request) bool
+}
+
 // ppppSharedProbe holds PPPP probe state shared across all /ws/pppp-state
 // clients. This ensures at most one probe goroutine runs at a time regardless
 // of how many browser tabs are open simultaneously (upstream PR #17).
@@ -60,11 +66,17 @@ func New(services *service.ServiceManager, st state, logger *slog.Logger) *Handl
 		services:  services,
 		state:     st,
 		log:       logger.With("component", "ws"),
-		upgrader:  websocket.Upgrader{CheckOrigin: func(_ *http.Request) bool { return true }},
 		ppppProbe: &ppppSharedProbe{},
 	}
 	if vs, ok := st.(videoState); ok {
 		h.vstate = vs
+	}
+	// WebSockets are not covered by CORS, so the Origin must be checked here or
+	// any web page could open the control and telemetry sockets. A nil
+	// CheckOrigin makes gorilla/websocket reject handshakes whose Origin host
+	// differs from the Host header.
+	if origins, ok := st.(originState); ok {
+		h.upgrader.CheckOrigin = origins.WebSocketOriginAllowed
 	}
 	return h
 }

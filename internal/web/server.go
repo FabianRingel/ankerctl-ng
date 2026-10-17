@@ -71,11 +71,14 @@ type Server struct {
 	port               int
 	maxUploadBytes     int64
 	devMode            bool
+	allowInsecure      bool
+	trustedOrigins     []string
 
-	hostSet    bool
-	portSet    bool
-	apiKeySet  bool
-	devModeSet bool
+	hostSet          bool
+	portSet          bool
+	apiKeySet        bool
+	devModeSet       bool
+	allowInsecureSet bool
 
 	appVersion string
 
@@ -137,13 +140,25 @@ func WithAPIKey(key string) Option {
 	}
 }
 
-// WithInsecure disables API-key checks by clearing the configured key.
+// WithInsecure disables API-key checks by clearing the configured key. This is
+// an explicit opt-out, so it also lifts the exposure guard.
 func WithInsecure(insecure bool) Option {
 	return func(s *Server) {
 		if insecure {
 			s.apiKey = ""
 			s.apiKeySet = true
+			s.allowInsecure = true
+			s.allowInsecureSet = true
 		}
+	}
+}
+
+// WithAllowInsecure overrides ANKERCTL_ALLOW_INSECURE: when true the server may
+// listen on non-loopback addresses without an API key.
+func WithAllowInsecure(allow bool) Option {
+	return func(s *Server) {
+		s.allowInsecure = allow
+		s.allowInsecureSet = true
 	}
 }
 
@@ -213,11 +228,17 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 
+	crossOrigin, err := mw.CrossOriginProtection(s.trustedOrigins, s.logger)
+	if err != nil {
+		return fmt.Errorf("ANKERCTL_TRUSTED_ORIGINS: %w", err)
+	}
+
 	r := chi.NewRouter()
 	r.Use(chimw.Recoverer)
 	r.Use(chimw.RequestID)
 	r.Use(mw.AccessLogger(s.logger))
 	r.Use(mw.SecurityHeaders)
+	r.Use(crossOrigin)
 	r.Use(mw.RateLimit(100, time.Minute))
 	r.Use(mw.BodySizeLimit(s.maxUploadBytes))
 	r.Use(mw.RequirePrinter(s))
@@ -323,6 +344,15 @@ func (s *Server) ReloadState() {
 	}
 }
 
+// WebSocketOriginAllowed reports whether a WebSocket handshake comes from the
+// same origin or from one listed in ANKERCTL_TRUSTED_ORIGINS.
+func (s *Server) WebSocketOriginAllowed(r *http.Request) bool {
+	s.mu.RLock()
+	trusted := s.trustedOrigins
+	s.mu.RUnlock()
+	return mw.WebSocketOriginAllowed(r, trusted)
+}
+
 // SessionManager returns the session manager used by auth middleware.
 func (s *Server) SessionManager() *mw.SessionManager {
 	s.mu.RLock()
@@ -406,6 +436,15 @@ func (s *Server) initialize() error {
 			}
 			s.apiKey = apiKey
 		}
+	}
+
+	s.trustedOrigins = mw.ParseTrustedOrigins(os.Getenv("ANKERCTL_TRUSTED_ORIGINS"))
+
+	if !s.allowInsecureSet {
+		s.allowInsecure = InsecureExposureAllowed()
+	}
+	if err := ValidateExposure(s.host, s.apiKey, s.allowInsecure); err != nil {
+		return err
 	}
 
 	secret, err := s.loadOrCreateSecretKey()

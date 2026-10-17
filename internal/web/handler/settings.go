@@ -272,7 +272,12 @@ func (h *Handler) SettingsMQTTGet(w http.ResponseWriter, _ *http.Request) {
 	if cfg != nil {
 		ha = cfg.HomeAssistant
 	}
-	h.writeJSON(w, http.StatusOK, map[string]any{"home_assistant": ha})
+	redacted, ok := h.redactedSection(ha, mqttSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load mqtt settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"home_assistant": redacted})
 }
 
 // SettingsMQTTUpdate updates HomeAssistant MQTT settings.
@@ -314,7 +319,12 @@ func (h *Handler) SettingsMQTTUpdate(w http.ResponseWriter, r *http.Request) {
 		ha.Configure(updated)
 	}
 
-	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "home_assistant": updated})
+	redacted, ok := h.redactedSection(updated, mqttSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load mqtt settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "home_assistant": redacted})
 }
 
 // SettingsAppearanceGet returns the appearance settings.
@@ -465,7 +475,12 @@ func (h *Handler) SettingsCameraGet(w http.ResponseWriter, r *http.Request) {
 	}
 	_, idx, _ := h.activePrinter(cfg)
 	resolved := resolveCameraSettings(cfg, idx)
-	h.writeJSON(w, http.StatusOK, map[string]any{"camera": resolved})
+	redacted, ok := h.redactedSection(resolved, cameraSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load camera settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"camera": redacted})
 }
 
 // SettingsCameraUpdate updates the camera source and/or external camera settings.
@@ -548,7 +563,12 @@ func (h *Handler) SettingsCameraUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "camera": updated})
+	redacted, ok := h.redactedSection(updated, cameraSecretPaths...)
+	if !ok {
+		h.writeError(w, http.StatusInternalServerError, "failed to load camera settings")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, map[string]any{"status": "ok", "camera": redacted})
 }
 
 // resolveCameraSettings mirrors Python's web.camera.resolve_camera_settings().

@@ -2,7 +2,7 @@ services:
     ankerctl-ng:
         # Use 'build: .' to build locally instead of pulling from the registry.
         # build: .
-        image: ghcr.io/jr551/ankerctl-ng:latest
+        image: ghcr.io/fabianringel/ankerctl-ng:latest
         container_name: ankerctl-ng
         restart: unless-stopped
 
@@ -13,6 +13,8 @@ services:
 
         # Load environment variables from .env file.
         # Copy .env.example to .env and adjust values as needed.
+        # ANKERCTL_API_KEY is required: the container listens on 0.0.0.0 and
+        # refuses to start without a key.
         env_file:
             - .env
 
